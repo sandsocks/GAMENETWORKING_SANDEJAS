@@ -8,26 +8,36 @@ using UnityEngine.SceneManagement;
 public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks 
 {
     #region Public Variables
-
+    [SerializeField] private NetworkPrefabRef playerPrefabRef;
     #endregion
 
     #region Private Variables
     private NetworkRunner _networkRunner;
+    private Dictionary<PlayerRef, NetworkObject> _spawnedCharacters = new();
     #endregion
 
     #region Unity Callbacks
     public void OnInput(NetworkRunner runner, NetworkInput input)
-
     {
-        throw new NotImplementedException();
-    }
-    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
-    {
-        throw new NotImplementedException();
+        
     }
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
-        throw new NotImplementedException();
+        if (runner.IsServer) return;
+        
+        var position = Vector3.zero;
+        var networkObject = runner.Spawn(playerPrefabRef, position, Quaternion.identity, player);
+
+        _spawnedCharacters.Add(player, networkObject);
+        
+    }
+
+    public void OnPlayerLeft(NetworkRunner runner, PlayerRef player)
+    {
+        if (!_spawnedCharacters.TryGetValue(player, out var playerObject)) return;
+
+        runner.Despawn(playerObject);
+        _spawnedCharacters.Remove(player);
     }
     #endregion
 
@@ -50,6 +60,14 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
         });
     }
 
+    private void Start()
+    {
+        #if SERVER
+        StartGame(GameMode.Host);
+        #elif CLIENT
+        StartGame(GameMode.Client);
+        #endif
+    }
     #region Unused Callbacks
     public void OnConnectedToServer(NetworkRunner runner)
     {
