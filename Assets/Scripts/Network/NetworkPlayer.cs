@@ -5,6 +5,10 @@ using UnityEngine;
 public class NetworkPlayer : NetworkBehaviour
 {
     [SerializeField] private MeshRenderer _meshRenderer;
+
+    [Header("Network Properties")]
+    [Networked] public Vector3 NetworkedPosition { get :set }
+        
     #region Fusion Callbacks
     public override void Spawned()
     {

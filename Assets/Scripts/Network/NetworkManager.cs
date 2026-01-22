@@ -19,7 +19,9 @@ public class NetworkManager : MonoBehaviour, INetworkRunnerCallbacks
     #region Unity Callbacks
     public void OnInput(NetworkRunner runner, NetworkInput input)
     {
-        
+        var data = new NetworkInputData();
+        data.InputVector = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        input.Set(data);
     }
     public void OnPlayerJoined(NetworkRunner runner, PlayerRef player)
     {
